@@ -1,21 +1,9 @@
 import iziToast from 'izitoast';
-import 'izitoast/dist/css/iziToast.min.css';
+
+import { MESSAGES, MESSAGES_BG_COLORS, showInfoMessage } from './js/helpers';
 
 import { getGalleryData } from './js/pixabay-api';
 import { renderGallery } from './js/render-functions';
-
-const MESSAGES = {
-  info: 'Please enter a value in the search field!',
-  warning:
-    'Sorry, there are no images matching your search query. Please try again!',
-  error: 'Sorry, there are no connection to the server. Please try again!',
-};
-
-const MESSAGES_BG_COLORS = {
-  blue: '#abd4f8',
-  orange: '#f28111',
-  red: '#e97782',
-};
 
 const form = document.querySelector('.search-form');
 const gallery = document.querySelector('.gallery');
@@ -39,21 +27,16 @@ async function onSubmitForm(event) {
     return;
   }
 
-  const galleryData = await getGalleryData(search.trim());
-
-  if (validateGalleryData(galleryData)) {
-    renderGallery(galleryData, gallery);
+  try {
+    const galleryData = await getGalleryData(search.trim());
+    if (validateGalleryData(galleryData)) {
+      renderGallery(galleryData, gallery);
+    }
+  } catch (error) {
+    showInfoMessage(MESSAGES.exception + error, MESSAGES_BG_COLORS.orange);
   }
 
   event.target.reset();
-}
-
-function showInfoMessage(message, color) {
-  iziToast.info({
-    position: 'topRight',
-    backgroundColor: `${color}`,
-    message: `${message}`,
-  });
 }
 
 function addLoader() {
@@ -62,11 +45,7 @@ function addLoader() {
 }
 
 function validateGalleryData(galleryData) {
-  if (
-    typeof galleryData === 'string' &&
-    galleryData.indexOf('Exception') !== -1
-  ) {
-    showInfoMessage(MESSAGES.error, MESSAGES_BG_COLORS.orange);
+  if (!galleryData) {
     gallery.innerHTML = '';
     return false;
   } else if (galleryData && galleryData.totalHits === 0) {

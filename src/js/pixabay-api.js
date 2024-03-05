@@ -1,5 +1,7 @@
+import { MESSAGES, MESSAGES_BG_COLORS, showInfoMessage } from './helpers';
+
 const options = {
-  method: 'GET', // *GET, POST, PUT, DELETE, etc.
+  method: 'GET',
 };
 const API_KEY = '42598065-1779ad5a953180c3fe77c2809';
 const API_URL = 'https://pixabay.com/api/?';
@@ -14,14 +16,16 @@ export async function getGalleryData(queryValue) {
       safesearch: true,
     });
 
-    const response = await fetch(API_URL + searchParams, options);
-
+    const response = await fetch(API_URL + searchParams, options).then();
     if (!response.ok) {
-      throw new Error(`Error(getGalleryData): ${response.status}`);
+      showInfoMessage(MESSAGES.error, MESSAGES_BG_COLORS.orange);
+      return;
     }
-
     return await response.json();
-  } catch (error) {
-    return `Exception(getGalleryData): ${error}`;
+  } catch (err) {
+    showInfoMessage(
+      `${MESSAGES.exception} ERROR:  ${err}`,
+      MESSAGES_BG_COLORS.orange
+    );
   }
 }
